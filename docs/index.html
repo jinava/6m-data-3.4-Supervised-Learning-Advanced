@@ -86,8 +86,8 @@ section::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;bac
 .bvb-col .sum{font-family:'Open Sans',sans-serif;font-style:italic;color:var(--ink-2);font-size:16px;margin:0 0 14px}
 .bvb-svg{width:100%;height:200px;display:block;border:1px solid var(--rule);background:var(--paper-3)}
 .bvb-list{margin:14px 0 0;padding-left:0;list-style:none}
-.bvb-list li{display:grid;grid-template-columns:14px 1fr;gap:8px;font-size:15px;color:var(--ink-2);line-height:1.45;margin-bottom:6px}
-.bvb-list li::before{content:"●";color:var(--accent);font-size:10px;line-height:1.6;text-align:center}
+.bvb-list li{display:block;position:relative;padding-left:22px;font-size:15px;color:var(--ink-2);line-height:1.45;margin-bottom:6px}
+.bvb-list li::before{content:"●";color:var(--accent);font-size:10px;line-height:1.6;text-align:center;position:absolute;left:0;top:.2em;width:14px}
 .bvb-list li b{color:var(--ink)}
 
 .duet{display:grid;grid-template-columns:1fr 1fr;gap:36px;align-items:start}
@@ -254,6 +254,15 @@ h3 em,h3 strong{color:var(--ntu-crimson)!important;font-style:normal!important;f
 .duet-verdict,.kside .verdict{font-style:normal!important;color:var(--text)!important;font-weight:400!important}
 
 .tag{background:var(--ntu-crimson)!important;color:#fff!important;border-radius:3px!important;font-family:'JetBrains Mono','Open Sans',monospace!important}
+
+/* Tighten bvb bullet lists */
+.bvb-col .sum{margin:0 0 10px!important}
+.bvb-list{margin-top:8px!important}
+.bvb-list li{margin-bottom:3px!important}
+
+/* Fix bold/em text colour inside open self-check answers */
+.qa.on .a b,.qa.on .a strong{color:#ffffff!important}
+.qa.on .a em,.qa.on .a i{color:#f5c2ad!important}
 </style>
 
 </head>
@@ -276,7 +285,7 @@ h3 em,h3 strong{color:var(--ntu-crimson)!important;font-style:normal!important;f
   <div class="cover-grid">
     <div>
       <div class="label" style="color:var(--accent)">Chapter Four &middot; Same data, harder algorithms</div>
-      <h1>"Try those <em>tree</em>-based<br>models you mentioned."</h1>
+      <h1>"Try those <em>tree</em>-based <br>models you mentioned."</h1>
       <p class="cover-lede"><span class="dropcap">M</span>arcus signed off on Sarah's logistic regression on Friday and left her one note: <em>make it better.</em> Same dataset, same target column. By Friday she has to put a decision tree, a random forest, and a gradient booster on the table next to last week's baseline &mdash; and tell the team which one to ship. The week's real lesson isn't which model wins on F1. It's how to tune honestly, compare fairly, and pick the model the team can operate.</p>
     </div>
     <div class="cover-side">
@@ -310,7 +319,7 @@ h3 em,h3 strong{color:var(--ntu-crimson)!important;font-style:normal!important;f
       <span class="lvt-tag bad">Logistic regression &middot; one line</span>
       <h3>The <em>straight</em> boundary.</h3>
       <svg class="lvt-svg" id="linSvg" viewBox="0 0 360 280" preserveAspectRatio="xMidYMid meet"></svg>
-      <p class="lvt-foot">Linear models draw one hyperplane. When churners cluster in two opposite corners, a single line cannot separate them &mdash; accuracy hits a ceiling unless you hand-engineer an interaction term.</p>
+      <p class="lvt-foot">Linear models require manual feature engineering &mdash; e.g. interaction terms or polynomial transformations &mdash; to capture non-linear relationships. When churners cluster in two opposite corners, a single line cannot separate them; accuracy hits a ceiling.</p>
     </div>
     <div class="lvt-col">
       <span class="lvt-tag good">Decision tree &middot; recursive rectangles</span>
@@ -322,7 +331,7 @@ h3 em,h3 strong{color:var(--ntu-crimson)!important;font-style:normal!important;f
         elif tenure &lt; 0.15 &amp; returns &lt; 0.25 &rarr; <span class="leaf">churn</span><br>
         else &rarr; stay
       </div>
-      <p class="lvt-foot">Trees split on thresholds, not distances &mdash; so they pick up interactions automatically and ignore scale. Skip <span class="mono">StandardScaler</span> for tree models. You still need to one-hot encode categoricals.</p>
+      <p class="lvt-foot">Decision trees automatically capture non-linearities and feature interactions through hierarchical splitting &mdash; no feature engineering required. They also ignore scale, so skip <span class="mono">StandardScaler</span>. Note: sklearn tree models still require one-hot encoding for categorical features; some libraries (e.g. CatBoost) handle categoricals natively without encoding.</p>
     </div>
   </div>
 </section>
@@ -370,7 +379,7 @@ h3 em,h3 strong{color:var(--ntu-crimson)!important;font-style:normal!important;f
     <div class="section-title">
       <div class="label">The tuning duet</div>
       <h2><span class="mono">learning_rate</span> and <span class="mono">n_estimators</span>, <em>together.</em></h2>
-      <p class="deck">Boosting's two main dials are not independent &mdash; lowering one almost always means raising the other. Slide them below and watch the validation F1 curve. Too few rounds: underfit. Too many at a high learning rate: overfit. Early stopping is how you let the model find the sweet spot.</p>
+      <p class="deck"><strong>learning_rate</strong> controls how much each new tree contributes to the ensemble &mdash; smaller means more conservative, incremental updates. <strong>n_estimators</strong> is the total number of trees to build. These two dials are not independent: a lower learning rate needs more trees to reach the same fit, and vice versa. Slide them below and watch the validation F1 curve. Too few rounds or too large a step: underfit or overfit. Early stopping watches the validation curve and halts when it stops improving.</p>
     </div>
   </div>
 
@@ -385,7 +394,7 @@ h3 em,h3 strong{color:var(--ntu-crimson)!important;font-style:normal!important;f
       <input type="range" id="nSlider" min="10" max="800" step="10" value="200">
       <div class="duet-vals"><span>10</span><span>800</span></div>
 
-      <p style="font-family:'Newsreader',serif;font-style:italic;color:var(--ink-2);font-size:15px;margin-top:18px;line-height:1.5">Validation F1 (red) eventually peels away from training F1 (teal). That gap is the overfit. Early stopping watches the red line and halts when it stops climbing.</p>
+      <p style="font-family:'Newsreader',serif;font-style:italic;color:var(--ink-2);font-size:15px;margin-top:18px;line-height:1.5">The <strong style="color:#0e4540">teal line</strong> is training F1; the <strong style="color:#cf3a17">red line</strong> is validation F1. In a healthy zone, both lines rise together. Push too far (high learning rate &times; many rounds) and training climbs while validation flattens &mdash; that widening gap is overfit. Early stopping watches the red line and halts when it stops improving.</p>
     </div>
 
     <div class="duet-vis">
@@ -406,7 +415,7 @@ h3 em,h3 strong{color:var(--ntu-crimson)!important;font-style:normal!important;f
     <div class="section-title">
       <div class="label">The bake-off</div>
       <h2>F1 wins on paper. <em>Operability</em> wins ties.</h2>
-      <p class="deck">Sarah's Friday slide. Four candidates, same held-out test set, same five-fold CV. The booster wins by 0.022 F1. Whether that gap survives the operational columns &mdash; that's the actual decision.</p>
+      <p class="deck">Sarah's Friday slide. Three models, same held-out test set, same five-fold CV. F1 is the scoring metric throughout &mdash; on an imbalanced dataset where churners are the minority class, accuracy is misleading because always predicting "no churn" scores high. F1 balances precision and recall, so it rewards actually finding churners. The tuned random forest edges out gradient boosting by 0.008 CV F1 (0.346 vs 0.338). Whether that gap survives the operational columns &mdash; that's the actual decision.</p>
     </div>
   </div>
 
@@ -426,44 +435,35 @@ h3 em,h3 strong{color:var(--ntu-crimson)!important;font-style:normal!important;f
       <tbody>
         <tr>
           <td class="name">Logistic Reg. <span style="font-family:'JetBrains Mono',monospace;font-style:normal;font-size:11px;color:var(--ink-soft)"> &middot; L03 baseline</span></td>
-          <td class="f1">0.671 &plusmn; 0.014</td>
-          <td>3 s</td>
+          <td class="f1">0.333 &plusmn; 0.013</td>
+          <td>2 s</td>
           <td><span class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span></td>
           <td>sklearn</td>
           <td><span class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span></td>
           <td><span class="pill">baseline</span></td>
         </tr>
-        <tr>
-          <td class="name">Decision Tree</td>
-          <td class="f1">0.694 &plusmn; 0.021</td>
-          <td>4 s</td>
-          <td><span class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span></td>
-          <td>sklearn</td>
-          <td><span class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span></td>
-          <td><span class="pill">demo only</span></td>
-        </tr>
         <tr class="winner">
-          <td class="name">Random Forest</td>
-          <td class="f1">0.731 &plusmn; 0.012</td>
-          <td>22 s</td>
+          <td class="name">Random Forest <span style="font-family:'JetBrains Mono',monospace;font-style:normal;font-size:11px;color:var(--ink-soft)"> &middot; tuned</span></td>
+          <td class="f1">0.346 &plusmn; 0.023</td>
+          <td>31 s</td>
           <td><span class="stars">&#9733;&#9733;&#9733;&#9733;</span><span style="opacity:.2">&#9733;</span></td>
           <td>sklearn</td>
           <td><span class="stars">&#9733;&#9733;&#9733;&#9733;</span><span style="opacity:.2">&#9733;</span></td>
           <td><span class="pill ship">SHIP</span></td>
         </tr>
         <tr>
-          <td class="name">Gradient Boost.</td>
-          <td class="f1">0.753 &plusmn; 0.018</td>
-          <td>1m 14s</td>
+          <td class="name">Gradient Boost. <span style="font-family:'JetBrains Mono',monospace;font-style:normal;font-size:11px;color:var(--ink-soft)"> &middot; tuned</span></td>
+          <td class="f1">0.338 &plusmn; 0.017</td>
+          <td>22 s</td>
           <td><span class="stars">&#9733;&#9733;&#9733;</span><span style="opacity:.2">&#9733;&#9733;</span></td>
-          <td>+ xgboost</td>
-          <td><span class="stars">&#9733;&#9733;</span><span style="opacity:.2">&#9733;&#9733;&#9733;</span></td>
+          <td>sklearn</td>
+          <td><span class="stars">&#9733;&#9733;&#9733;</span><span style="opacity:.2">&#9733;&#9733;</span></td>
           <td><span class="pill">runner-up</span></td>
         </tr>
       </tbody>
     </table>
   </div>
-  <p class="bake-note">The booster's 0.022 F1 lead is real (outside the cross-val standard deviation), but it adds a third-party dependency, retrains brittly, and is harder to explain when a customer asks "why was I flagged?". Random forest closes most of the gap with none of the costs. Sarah ships the forest, keeps the booster as a runner-up to revisit if churn cost goes up.</p>
+  <p class="bake-note">The random forest's 0.008 CV F1 lead over gradient boosting is narrow but consistent (0.346 &plusmn; 0.023 vs 0.338 &plusmn; 0.017). Both use sklearn's own implementations &mdash; no third-party dependency. One caveat on explainability: both models' <span class="mono">feature_importances_</span> give a <em>global</em> picture of which features matter most across all predictions &mdash; they tell you "tenure and returns drive most decisions" but cannot explain why a specific customer was flagged. For per-customer explanations you'd need SHAP values. Sarah ships the forest &mdash; slightly higher CV F1, more stable across retrains, and the same operational simplicity as the LR baseline.</p>
 </section>
 
 <section id="s5">
@@ -520,7 +520,7 @@ h3 em,h3 strong{color:var(--ntu-crimson)!important;font-style:normal!important;f
     <div class="qa" data-qn="Q1">
       <span class="hint">&#9656; Click to reveal</span>
       <b>Do tree models need <span class="mono">StandardScaler</span>?</b>
-      <div class="a"><b>No.</b> Trees split on thresholds, not distances &mdash; a feature in pounds and one in proportions get the same chance. You still need to one-hot encode categoricals; you do not need to scale. But skip scaling explicitly, don't forget it.</div>
+      <div class="a"><b>No.</b> Trees split on thresholds, not distances &mdash; a feature in pounds and one in proportions get the same chance, so scaling does nothing. For sklearn tree models you still need to one-hot encode categorical features; some third-party libraries (e.g. CatBoost) handle categoricals natively without encoding. What you always skip is <code>StandardScaler</code>.</div>
     </div>
 
     <div class="qa" data-qn="Q2">
@@ -550,7 +550,7 @@ h3 em,h3 strong{color:var(--ntu-crimson)!important;font-style:normal!important;f
     <div class="qa" data-qn="Q6">
       <span class="hint">&#9656; Click to reveal</span>
       <b>A regulator asks: "Why did the model flag this customer?" Which model is easier to defend?</b>
-      <div class="a"><b>Random forest.</b> Sklearn's <span class="mono">feature_importances_</span> gives a stable, defensible ranking ("tenure, returns, ticket-rate together drive 60% of decisions"). Gradient boosting's importances are noisier and individual-tree paths are messier. Match the model to the audience that will challenge it.</div>
+      <div class="a"><b>Careful &mdash; neither model answers that question directly.</b> <span class="mono">feature_importances_</span> gives a <em>global</em> ranking across all predictions ("tenure and returns drive 60% of decisions overall"), not a per-customer explanation. To answer "why was this specific customer flagged?" you need SHAP values or a similar technique. That said, random forest's importances are more stable and easier to present to a business audience than a boosted ensemble, so it's the easier model to defend at a regulatory review &mdash; just be explicit that you're describing feature relevance across the dataset, not the logic for one individual.</div>
     </div>
 
     <div class="qa" data-qn="Q7">
@@ -823,14 +823,15 @@ h3 em,h3 strong{color:var(--ntu-crimson)!important;font-style:normal!important;f
   const verdict = document.getElementById('duetVerdict');
 
   function curves(lr, n){
-    const tr = [];
-    const val = [];
+    const tr = [], val = [];
     const N = 60;
     for (let i=0;i<=N;i++){
       const k = (i/N)*n;
-      const trF = 1 - Math.exp(-k*lr*0.025);
-      const overfit = Math.max(0, k*lr*0.005 - 1.0);
-      const valF = Math.max(0.4, trF * (1 - Math.pow(overfit,1.6)*0.5));
+      // F1 rises from ~0.55 to ~0.95 as the model learns
+      const trF = 0.55 + 0.40 * (1 - Math.exp(-k * lr * 0.08));
+      // Overfit gap grows once k*lr exceeds ~15
+      const overfit = Math.max(0, k * lr - 15) * 0.012;
+      const valF = Math.max(0.52, trF - overfit - 0.03);
       tr.push({x:i/N, y:trF});
       val.push({x:i/N, y:valF});
     }
@@ -902,14 +903,12 @@ h3 em,h3 strong{color:var(--ntu-crimson)!important;font-style:normal!important;f
     gapV.className = 'v ' + (gap > 0.15 ? 'is-bad' : (gap<0.06?'is-good':''));
     let h='';
     const product = lr * n;
-    if (product < 5){
-      h = "<em>Underfit.</em> The model has not learned enough yet.";
-    } else if (product > 60){
-      h = "<em>Overfit.</em> Validation has peaked; later rounds memorise.";
+    if (product < 4){
+      h = "<em>Underfit.</em> The model hasn't seen enough to learn — add more rounds or raise the learning rate.";
     } else if (gap > 0.15){
-      h = "Train soars, val stalls. <em>Lower the learning rate.</em>";
+      h = "<em>Overfit.</em> Train climbs while validation flattens — lower the learning rate or reduce rounds.";
     } else {
-      h = "<em>Healthy fit.</em> Train and val rise together &mdash; let early stopping pick the round.";
+      h = "<em>Healthy fit.</em> Train and val rise together — let early stopping pick the stopping point.";
     }
     verdict.innerHTML = h;
   }
